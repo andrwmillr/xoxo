@@ -14,13 +14,15 @@ const printBoard = () => {
 }
 
 const getInput = player => async () => {
-  const {turn} = game.getState()  
+  const {turn} = game.getState()
+  console.log(game.getState())
   if (turn !== player) return
   const ans = await inquirer.prompt([{
     type: 'input',
     name: 'coord',
     message: `${turn}'s move (row,col):`
   }])
+  console.log(ans)
   const [row=0, col=0] = ans.coord.split(/[,\s+]/).map(x => +x)
   game.dispatch(move(turn, [row, col]))
 }
