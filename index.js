@@ -15,9 +15,9 @@ const ongoingState = gameReducer.reducer({board: ongoing, turn: 'X', winner: nul
 
 const possMoves = ai.moves(ongoingState.board)
 
-console.log(ongoingState)
+// console.log('SCORES\n', possMoves, '\n', possMoves.map(move => ai.score(ongoingState, move)))
 
-console.log('SCORES\n', possMoves, '\n', possMoves.map(move => ai.score(ongoingState, move)))
+// console.log(ai.chooseMove(ongoingState))
 
 // console.log(ai.moves(ongoing))
 // console.log(ongoing)
@@ -69,16 +69,18 @@ const printWinner = () => {
   return gameReducer.winner(board);
 };
 
-// const aiMove = (player) => {
-//   game.dispatch(gameReducer.move(player, ai.chooseMove(game.getState())))
-// }
+const aiMove = (aiXO) => {
+  if (game.getState().turn === aiXO) {
+    game.dispatch(gameReducer.move(aiXO, ai.chooseMove(game.getState())))
+  }
+}
 
 const game = createStore(gameReducer.reducer);
 
 game.subscribe(printBoard);
 game.subscribe(() => game.getState());
 game.subscribe(getInput('X'));
-game.subscribe(getInput('O'));
+game.subscribe(() => aiMove('O'));
 game.subscribe(() => {
   if (game.getState().winner !== null) {
     console.log(game.getState().winner, 'is the winner!');

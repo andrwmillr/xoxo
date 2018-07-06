@@ -31,7 +31,7 @@ const chooseMove = (state) => {
   let bestScore = -2;
   let chosenMove;
   for (let i = 0; i < possMoves.length; i++) {
-    if (score(state, possMoves[i]) > score) {
+    if (score(state, possMoves[i]) > bestScore) {
       bestScore = score(state, possMoves[i])
       chosenMove = possMoves[i]
     }
