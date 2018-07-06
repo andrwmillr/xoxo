@@ -19,12 +19,12 @@ const streak = (streakBoard, coords) => {
   return result;
 };
 
-const winner = thisBoard => {
+const winner = function (thisBoard) {
   if (streak(thisBoard, [[0, 0], [1, 1], [2, 2]])) {
     return streak(thisBoard, [[0, 0], [1, 1], [2, 2]]);
   }
   if (streak(thisBoard, [[0, 2], [1, 1], [2, 0]])) {
-    return streak(thisBoard, [[0, 0], [1, 1], [2, 2]]);
+    return streak(thisBoard, [[0, 2], [1, 1], [2, 0]]);
   }
 
   let streakArr = [];
@@ -43,12 +43,10 @@ const winner = thisBoard => {
   streakArr.forEach(streakEl => {
     if (streak(thisBoard, streakEl)) {
       result = streak(thisBoard, streakEl);
-      // let toReturn = streak(thisBoard, streakEl);
-      return result;
     }
   });
 
-  if (result !== undefined) {
+  if (result) {
     return result;
   }
 
@@ -63,8 +61,6 @@ const winner = thisBoard => {
 };
 
 const turnReducer = (state, action) => {
-  let result = bad(state, action);
-  console.log(result);
   switch (action.type) {
     case 'START':
       return 'X';
@@ -72,63 +68,47 @@ const turnReducer = (state, action) => {
       if (action.player === 'X') return 'O';
       else return 'X';
     default:
-      return state;
+      return state.turn;
   }
 };
 
 const boardReducer = (state, action) => {
   switch (action.type) {
     case 'MOVE':
-      console.log('calling board.setIn');
-      board = board.setIn(action.position, action.player);
-      return board;
+      const nextBoard = state.board.setIn(action.position, action.player);
+      return nextBoard;
     default:
-      return board;
+      return state.board;
   }
 };
 
-const reducer = (state, action) => {
-  if (bad(state, action) === null) {
-    board = boardReducer(state, action);
-    let winningSymbol = winner(board);
-    return {
-      board,
-      turn: turnReducer(state, action),
-      winner: winningSymbol,
-    };
-  } else {
-    console.log('hit error block');
-    console.log(bad(state, action));
-    return {
-      ...state,
-      error: bad(state, action),
-    };
+const reducer = (state = {board: board}, action) => {
+  const error = bad(state, action)
+  if (error) {
+    // console.log(error)
+    return { ...state, error }
   }
+  return {
+    board: boardReducer(state, action),
+    turn: turnReducer(state, action),
+    winner: winner(boardReducer(state, action)),
+  };
 };
 
 const bad = (state, action) => {
-  switch (action.type) {
-    case 'START':
-      return null;
-    // if (action.player || action.position) {
-    //   return 'Error, start function contains extra arguments';
-    // }
-    case 'MOVE':
-      console.log('**** action', action.position);
+  if (action.type === 'MOVE') {
       if (action.position.length !== 2) {
-        return 'Error, position is not a 2 element array';
-      } else if (board.getIn(action.position)) {
-        console.log('current position: ', action.position);
-        console.log(
-          'getIn of current position: ',
-          board.getIn(action.position)
-        );
-        return 'Error, position is already filled';
+        return 'ERROR: position is not a 2 element array.';
       }
-      return null;
-    default:
-      return null;
+      if (state.board.hasIn(action.position)) {
+        return `ERROR: position ${action.position} is already filled.`;
+      }
+      const posArr = action.position
+      if (posArr[0] < 0 || posArr[0] > 2 || posArr[1] < 0 || posArr[1] > 2) {
+        return 'ERROR: invalid input! Please input numbers between 0 and 2.'
+      }
   }
+  return null
 };
 
 module.exports = { reducer, move, winner, streak };

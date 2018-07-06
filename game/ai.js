@@ -1,28 +1,42 @@
-import reducer, {move, bad} from '.'
+import {reducer, move} from '.'
 
-/**
- * moves(State) -> [...Action]
- * 
- * Return an array of actions which are valid moves from the given state.
- */
-export const moves = game => [] // TODO
 
-/**
- * score(game: State, move: Action) -> Number
- * 
- * Given a game state and an action, return a score for how good
- * a move the action would be for the player whose turn it is.
- * 
- * Scores will be numbers from -1 to +1. 1 is a winning state, -1
- * is state from which we can only lose.
- */
-const score = (game, move) => {
-  // TODO
+// REWRITE THIS
+const moves = board => {
+  let possMoves = []
+  for (let r = 0; r != 3; ++r) {
+    for (let c = 0; c != 3; ++c) {
+      if (!board.hasIn([r, c])) {
+        possMoves.push([r, c])
+      }
+    }
+  }
+  return possMoves
 }
 
-/**
- * play(state: State) -> Action
- * 
- * Return the best action for the current player.
- */
-export default state => undefined // TODO
+const score = (game, position) => {
+  const newGame = reducer(game, move(game.turn, position))
+  if (newGame.winner === game.turn) {
+    return 1
+  }
+  if (newGame.winner === 'draw') {return 0}
+  else {
+    const oppMoves = moves(newGame.board)
+    return -Math.max(...oppMoves.map(el => score(newGame, el)))
+  }
+}
+
+const chooseMove = (state) => {
+  const possMoves = moves(state.board)
+  let bestScore = -2;
+  let chosenMove;
+  for (let i = 0; i < possMoves.length; i++) {
+    if (score(state, possMoves[i]) > score) {
+      bestScore = score(state, possMoves[i])
+      chosenMove = possMoves[i]
+    }
+  }
+  return chosenMove
+}
+
+module.exports = { moves, score, chooseMove }
